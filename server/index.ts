@@ -160,9 +160,9 @@ app.post("/api/playerData/", (req, res, next) => {
 });
 
 app.get("/api/playerData/:id", (req, res, next) => {
-  const sql = "select * from playerData where id = ?";
+  const sql = "select * from playerData where playerID = ?";
   const params = [req.params.id];
-  db.get(sql, params, (err: Error, row: any[]) => {
+  db.all(sql, params, (err: Error, row: any[]) => {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
