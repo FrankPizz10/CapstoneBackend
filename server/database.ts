@@ -42,13 +42,7 @@ const db = new Database(DBSOURCE, (err: Error | null) => {
 
 const addDefaultPlayers = () => {
   const sqlDefaultPlayers = `INSERT INTO players (name) VALUES (?)`;
-  const defaultPlayers = [
-    "Player 1",
-    "Player 2",
-    "Player 3",
-    "Player 4",
-    "Player 5",
-  ];
+  const defaultPlayers = ["Arthur", "Frank", "Nick", "John", "Joe"];
   for (const player of defaultPlayers) {
     db.run(sqlDefaultPlayers, [player], (err: Error) => {
       if (err) {
