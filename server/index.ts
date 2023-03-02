@@ -1,77 +1,78 @@
-// import express, { Express, Request, Response } from "express";
-// import dotenv from "dotenv";
+import express, { Express, Request, Response } from "express";
+import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+import { seed } from "./script";
 
-// dotenv.config();
+dotenv.config();
 
-// const app: Express = express();
-// const port = 8000;
+const app: Express = express();
+const port = 8000;
 
-// const db = require("./database.js");
-// const cors = require("cors");
-// const bodyParser = require("body-parser");
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
-// app.use(
-//   bodyParser.urlencoded({
-//     extended: false,
-//   })
-// );
+const prisma = new PrismaClient();
 
-// app.use(bodyParser.json());
-// app.use(cors());
+seed().then(() => {
+    console.log("Seeded");
+});
 
-// app.get("/", (req: Request, res: Response) => {
-//   res.send("Express + TypeScript Server");
-// });
+app.use(
+    bodyParser.urlencoded({
+        extended: false,
+    })
+);
 
-// app.listen(port, () => {
-//   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
-// });
+app.use(bodyParser.json());
+app.use(cors());
 
-// let playerID = 1;
+app.get("/", (req: Request, res: Response) => {
+    res.send("Express + TypeScript Server");
+});
 
-// const updateID = (id: number) => {
-//   playerID = id;
-// };
+app.listen(port, () => {
+    console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
+});
 
-// // Fix Types
+let playerID = 1;
 
-// // Insert here other API endpoints
-// app.get("/api/players", (req, res, next) => {
-//   const sql = "select * from players";
-//   db.all(sql, (err: Error, rows: any[]) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: "success",
-//       data: rows,
-//     });
-//   });
-// });
+const updateID = (id: number) => {
+    playerID = id;
+};
+
+// Fix Types
+
+// Insert here other API endpoints
+app.get("/api/players", async (req, res, next) => {
+    const players = await prisma.player.findMany();
+    res.json({
+        message: "success",
+        data: players,
+    });
+});
 
 // app.post("/updateID", (req, res, next) => {
-//   playerID = req.body.id;
-//   updateID(playerID);
-//   res.json({
-//     message: "success",
-//     data: playerID,
-//   });
+//     playerID = req.body.id;
+//     updateID(playerID);
+//     res.json({
+//         message: "success",
+//         data: playerID,
+//     });
 // });
 
 // app.get("/api/players/:id", (req, res, next) => {
-//   const sql = "select * from players where id = ?";
-//   const params = [req.params.id];
-//   db.get(sql, params, (err: Error, row: any[]) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: "success",
-//       data: row,
+//     const sql = "select * from players where id = ?";
+//     const params = [req.params.id];
+//     db.get(sql, params, (err: Error, row: any[]) => {
+//         if (err) {
+//             res.status(400).json({ error: err.message });
+//             return;
+//         }
+//         res.json({
+//             message: "success",
+//             data: row,
+//         });
 //     });
-//   });
 // });
 
 // app.post("/api/players/", (req, res, next) => {

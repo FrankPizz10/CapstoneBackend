@@ -1,90 +1,38 @@
-import { PrismaClient } from '@prisma/client'
+import { Playerdata, PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-async function main() {
-    await addDefaultPlayers();
-    await addDefaultPlayerData();
+export async function seed() {
+    await addPlayerData();
 }
 
-main()
-    .then(async () => {
-        await prisma.$disconnect()
-    })
-    .catch(async (e) => {
-        console.error(e)
-        await prisma.$disconnect()
-        process.exit(1)
-    })
-
-async function addDefaultPlayers() {
-    const defaultPlayers = ['Frank', 'Arthur', 'Nick', 'John', 'Joe']
-    let id = 1;
-    for (const player of defaultPlayers) {
-        let playerExists;
-        try {
-            playerExists = await prisma.player.findFirst({
-                where: {
-                    id: id,
-                    name: player,
-                },
-            });
-        }
-        catch (e) {
-            continue;
-        };
-        if (!playerExists) {
-            const createPlayer = await prisma.player.create({
-                data: {
-                    name: player,
-                },
-            });
-            console.log(createPlayer);
-        }
-        else {
-            console.log('Player already exists');
-        }
-        id++;
+async function addPlayerData() {
+    const playerData = {
+        "Frank": [1, 1, 1, 1, 1],
+        "Arthur": [2, 2, 2, 2, 2],
+        "Nick": [3, 3, 3, 3, 3],
+        "John": [4, 4, 4, 4, 4],
+        "Joe": [5, 5, 5, 5, 5],
     }
-}
-
-async function addDefaultPlayerData() {
-    const defaultPlayerData = [
-        [1, 1, 1, 1, 1, 1],
-        [2, 2, 2, 2, 2, 2],
-        [3, 3, 3, 3, 3, 3],
-        [4, 4, 4, 4, 4, 4],
-        [5, 5, 5, 5, 5, 5],
-        [1, 10, 10, 10, 10, 10],
-    ]
-    for (const data of defaultPlayerData) {
-        let playerDataExists;
+    for (const name in playerData) {
         try {
-            playerDataExists = await prisma.playerdata.findFirst({
-                where: {
-                    playerId: data[0],
-                    timeStamp: data[1],
-                },
-            });
-        }
-        catch (e) {
-            continue;
-        };
-        if (!playerDataExists) {
-            const createPlayerData = await prisma.playerdata.create({
+            const player = await prisma.player.create({
                 data: {
-                    playerId: data[0],
-                    timeStamp: data[1],
-                    X: data[2],
-                    Y: data[3],
-                    Z: data[4],
-                    V: data[5],
+                    name,
                 },
             });
-            console.log(createPlayerData)
-        }
-        else {
-            console.log('Player data already exists');
+            await prisma.playerdata.create({
+                data: {
+                    playerId: player.id,
+                    timeStamp: playerData[name as keyof typeof playerData][0],
+                    X: playerData[name as keyof typeof playerData][1],
+                    Y: playerData[name as keyof typeof playerData][2],
+                    Z: playerData[name as keyof typeof playerData][3],
+                    V: playerData[name as keyof typeof playerData][4],
+                }
+            });
+        } catch (e) {
+            continue;
         }
     }
 }
