@@ -17,10 +17,10 @@ model Player {
 }
 
 model Playerdata {
-  id        Int    @id @default(autoincrement())
-  player    Player @relation(fields: [playerId], references: [id])
+  id        Int      @id @default(autoincrement())
+  player    Player   @relation(fields: [playerId], references: [id])
   playerId  Int
-  timeStamp BigInt
+  timeStamp DateTime
   X         Float
   Y         Float
   Z         Float

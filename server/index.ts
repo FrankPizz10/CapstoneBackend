@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-import { PrismaClient } from "@prisma/client";
-import { seed } from "./script";
+import { PrismaClient, Prisma } from "@prisma/client";
+import { seedData } from "./SeedDatabase";
 
 dotenv.config();
 
@@ -13,7 +13,7 @@ const bodyParser = require("body-parser");
 
 const prisma = new PrismaClient();
 
-seed().then(() => {
+seedData().then(() => {
     console.log("Seeded");
 });
 
@@ -40,9 +40,6 @@ const updateID = (id: number) => {
     playerID = id;
 };
 
-// Fix Types
-
-// Insert here other API endpoints
 app.get("/api/players", async (req, res, next) => {
     const players = await prisma.player.findMany();
     res.json({
@@ -51,126 +48,97 @@ app.get("/api/players", async (req, res, next) => {
     });
 });
 
-// app.post("/updateID", (req, res, next) => {
-//     playerID = req.body.id;
-//     updateID(playerID);
-//     res.json({
-//         message: "success",
-//         data: playerID,
-//     });
-// });
+app.get("/api/players/:id", async (req, res, next) => {
+    const player = await prisma.player.findUnique({
+        where: {
+            id: Number(req.params.id),
+        },
+    });
+    console.log(player);
+    res.json({
+        message: "success",
+        data: player,
+    });
+});
 
-// app.get("/api/players/:id", (req, res, next) => {
-//     const sql = "select * from players where id = ?";
-//     const params = [req.params.id];
-//     db.get(sql, params, (err: Error, row: any[]) => {
-//         if (err) {
-//             res.status(400).json({ error: err.message });
-//             return;
-//         }
-//         res.json({
-//             message: "success",
-//             data: row,
-//         });
-//     });
-// });
+app.post("/api/players/", async (req, res, next) => {
+    const errors: String[] = [];
 
-// app.post("/api/players/", (req, res, next) => {
-//   const errors: String[] = [];
-//   if (!req.body.name) {
-//     errors.push("No name specified");
-//   }
-//   if (errors.length) {
-//     res.status(400).json({ error: errors.join(",") });
-//     return;
-//   }
-//   const data = {
-//     name: req.body.name,
-//   };
-//   const sql = "INSERT INTO players (name) VALUES (?)";
-//   const params = [data.name];
-//   db.run(sql, params, function (err: Error, result: any) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: "success",
-//       data: data,
-//       id: db.lastID,
-//     });
-//   });
-// });
+    if (!req.body.name) {
+        errors.push("No name specified");
+    }
+    if (errors.length) {
+        res.status(400).json({ error: errors.join(",") });
+        return;
+    }
+    try {
+        const player = await prisma.player.create({
+            data: {
+                name: req.body.name,
+            },
+        });
+        res.json({
+            message: "success",
+            data: player,
+        });
+    }
+    catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            if (e.code === 'P2002') {
+                res.status(400).json({ error: "Name already exists" });
+            }
+        }
+    }
+});
 
-// type PlayerData = {
-//   playerID: number;
-//   timeStamp: number;
-//   X: number;
-//   Y: number;
-//   Z: number;
-//   V: number;
-// };
+app.post("/api/playerData/", async (req, res, next) => {
+    const errors: String[] = [];
+    if (!req.body.ts) {
+        errors.push("No name specified");
+    }
+    if (!req.body.xyzv) {
+        errors.push("Malformed Body");
+    }
+    if (errors.length) {
+        res.status(400).json({ error: errors.join(",") });
+        return;
+    }
+    if (req.body.bball === "NULL") {
+        res.status(400).json({ error: "No bball" });
+        return;
+    }
+    const spacialData = req.body.xyzv.find(
+        (data: number[]) => data[3] === req.body.bball
+    );
+    if (spacialData) {
+        const playerData = await prisma.playerdata.create({
+            data: {
+                playerId: playerID,
+                timeStamp: new Date(req.body.ts),
+                X: spacialData[0],
+                Y: spacialData[1],
+                Z: spacialData[2],
+                V: spacialData[3],
+            },
+        });
+        res.json({
+            message: "success",
+            data: playerData,
+        });
+    }
+    else {
+        res.status(400).json({ error: "No data for bball" });
+    }
+});
 
-// app.post("/api/playerData/", (req, res, next) => {
-//   const errors: String[] = [];
-//   if (!req.body.ts) {
-//     errors.push("No name specified");
-//   }
-//   if (!req.body.xyzv) {
-//     errors.push("Malformed Body");
-//   }
-//   if (errors.length) {
-//     res.status(400).json({ error: errors.join(",") });
-//     return;
-//   }
-//   if (req.body.bball === "NULL") {
-//     return;
-//   }
-//   const realData = req.body.xyzv.find(
-//     (data: number[]) => data[3] === req.body.bball
-//   );
-//   const data: PlayerData = {
-//     playerID: playerID,
-//     timeStamp: req.body.ts,
-//     X: realData[0],
-//     Y: realData[1],
-//     Z: realData[2],
-//     V: realData[3],
-//   };
-//   const sql =
-//     "INSERT INTO playerData (playerID, timeStamp, X, Y, Z, V) VALUES (?,?,?,?,?,?)";
-//   const params = [
-//     data.playerID,
-//     data.timeStamp,
-//     data.X,
-//     data.Y,
-//     data.Z,
-//     data.V,
-//   ];
-//   db.run(sql, params, function (err: Error, result: any) {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: "success",
-//       data: data,
-//       id: db.lastID,
-//     });
-//   });
-// });
-
-// app.get("/api/playerData/:id", (req, res, next) => {
-//   const sql = "select * from playerData where playerID = ?";
-//   const params = [req.params.id];
-//   db.all(sql, params, (err: Error, row: any[]) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: "success",
-//       data: row,
-//     });
-//   });
-// });
+app.get("/api/playerData/:id", async (req, res, next) => {
+    const playerData = await prisma.playerdata.findMany({
+        where: {
+            playerId: Number(req.params.id),
+        },
+    });
+    res.json({
+        message: "success",
+        data: playerData,
+    });
+});
