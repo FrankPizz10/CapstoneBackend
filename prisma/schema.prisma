@@ -20,7 +20,7 @@ model Playerdata {
   id        Int      @id @default(autoincrement())
   player    Player   @relation(fields: [playerId], references: [id])
   playerId  Int
-  timeStamp DateTime
+  timeStamp DateTime @unique
   X         Float
   Y         Float
   Z         Float

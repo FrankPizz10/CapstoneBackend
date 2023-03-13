@@ -55,7 +55,6 @@ async function addExtraData() {
     },
   });
   if (player) {
-    console.log("Here");
     const playerData = await prisma.playerdata.create({
       data: {
         playerId: player.id,
