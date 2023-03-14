@@ -6,7 +6,6 @@ import { seedData } from "./SeedDatabase";
 dotenv.config();
 
 const app: Express = express();
-const port = 8000;
 
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -33,8 +32,10 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
 
-app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(
+    `⚡️[server]: Server is running at http://localhost:${process.env.PORT}`
+  );
 });
 
 let playerID = 1;
