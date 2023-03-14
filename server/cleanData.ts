@@ -2,20 +2,10 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-prisma.playerdata
-  .deleteMany({})
-  .then(() => {
-    console.log("Deleted");
-  })
-  .catch((e) => {
-    console.log(e);
-  });
+const deleteData = async () => {
+  await prisma.playerdata.deleteMany({});
+  await prisma.player.deleteMany({});
+  console.log("Delete Data");
+};
 
-prisma.player
-  .deleteMany({})
-  .then(() => {
-    console.log("Deleted");
-  })
-  .catch((e) => {
-    console.log(e);
-  });
+deleteData(); // Call the function

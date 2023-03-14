@@ -13,9 +13,12 @@ const bodyParser = require("body-parser");
 
 const prisma = new PrismaClient();
 
-seedData().then(() => {
+const seed = async () => {
+  await seedData();
   console.log("Seeded");
-});
+};
+
+seed();
 
 app.use(
   bodyParser.urlencoded({
@@ -103,31 +106,21 @@ app.post("/api/playerData/", async (req, res, next) => {
     res.status(400).json({ error: errors.join(",") });
     return;
   }
-  if (req.body.bball === "NULL") {
-    res.status(400).json({ error: "No bball" });
-    return;
-  }
-  const spacialData = req.body.xyzv.find(
-    (data: number[]) => data[3] === req.body.bball
-  );
-  if (spacialData) {
-    const playerData = await prisma.playerdata.create({
-      data: {
-        playerId: playerID,
-        timeStamp: new Date(req.body.ts),
-        X: spacialData[0],
-        Y: spacialData[1],
-        Z: spacialData[2],
-        V: spacialData[3],
-      },
-    });
-    res.json({
-      message: "success",
-      data: playerData,
-    });
-  } else {
-    res.status(400).json({ error: "No data for bball" });
-  }
+  const playerData = await prisma.playerdata.create({
+    data: {
+      playerId: playerID,
+      timeStamp: new Date(req.body.ts),
+      X: req.body.xyzv[0],
+      Y: req.body.xyzv[1],
+      Z: req.body.xyzv[2],
+      V: req.body.xyzv[3],
+    },
+  });
+  res.json({
+    message: "success",
+    data: playerData,
+  });
+  console.log(playerData);
 });
 
 app.get("/api/playerData/:id", async (req, res, next) => {

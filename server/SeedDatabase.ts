@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -9,11 +9,11 @@ export async function seedData() {
 
 async function addPlayerData() {
   const playerData = {
-    Frank: [new Date(1).toISOString(), 1, 1, 1, 1],
-    Arthur: [new Date(2).toISOString(), 2, 2, 2, 2],
-    Nick: [new Date(3).toISOString(), 3, 3, 3, 3],
-    John: [new Date(4).toISOString(), 4, 4, 4, 4],
-    Joe: [new Date(5).toISOString(), 5, 5, 5, 5],
+    Frank: [new Date(10), 1, 1, 1, 1],
+    Arthur: [new Date(20000), 2, 2, 2, 2],
+    Nick: [new Date(30000000), 3, 3, 3, 3],
+    John: [new Date(4000000000), 4, 4, 4, 4],
+    Joe: [new Date(500000000000), 5, 5, 5, 5],
   };
   for (const name in playerData) {
     try {
@@ -43,7 +43,13 @@ async function addPlayerData() {
         },
       });
     } catch (e) {
-      continue;
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === "P2002") {
+          console.log(
+            "There is a unique constraint violation, a new user cannot be created with this timestamp"
+          );
+        }
+      }
     }
   }
 }
@@ -55,15 +61,25 @@ async function addExtraData() {
     },
   });
   if (player) {
-    const playerData = await prisma.playerdata.create({
-      data: {
-        playerId: player.id,
-        timeStamp: new Date(6).toISOString(),
-        X: 10,
-        Y: 10,
-        Z: 10,
-        V: 100,
-      },
-    });
+    try {
+      const playerData = await prisma.playerdata.create({
+        data: {
+          playerId: player.id,
+          timeStamp: new Date(6000000000000),
+          X: 10,
+          Y: 10,
+          Z: 10,
+          V: 100,
+        },
+      });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === "P2002") {
+          console.log(
+            "There is a unique constraint violation, a new user cannot be created with this timestamp"
+          );
+        }
+      }
+    }
   }
 }
