@@ -34,7 +34,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.listen(process.env.PORT, () => {
   console.log(
-    `⚡️[server]: Server is running at http://localhost:${process.env.PORT}`
+    `⚡️[server]: Server is running at https://capstonebackend.herokuapp.com/:${process.env.PORT}`
   );
 });
 
@@ -133,5 +133,57 @@ app.get("/api/playerData/:id", async (req, res, next) => {
   res.json({
     message: "success",
     data: playerData,
+  });
+});
+
+app.patch("/api/players/currentPlayer:id", async (req, res, next) => {
+  // if the request conntains an id parameter, update the id
+  if (req.params.id) {
+    updateID(Number(req.params.id));
+  }
+  res.json({
+    message: "success",
+    data: playerID,
+  });
+});
+
+app.get("/api/players/currentPlayer", async (req, res, next) => {
+  res.json({
+    message: "success",
+    data: playerID,
+  });
+});
+
+app.post("/api/uploadVideo", async (req, res, next) => {
+  if (!req.body.video) {
+    res.status(400).json({ error: "No video specified" });
+    return;
+  }
+  if (!req.body.ts) {
+    res.status(400).json({ error: "No timestamp specified" });
+    return;
+  }
+  const video = await prisma.playerVideos.create({
+    data: {
+      playerId: playerID,
+      video: req.body.video,
+      timeStamp: new Date(req.body.ts),
+    },
+  });
+  res.json({
+    message: "success",
+    data: video,
+  });
+});
+
+app.get("/api/players/:id/videos", async (req, res, next) => {
+  const videos = await prisma.playerVideos.findMany({
+    where: {
+      playerId: Number(req.params.id),
+    },
+  });
+  res.json({
+    message: "success",
+    data: videos,
   });
 });
