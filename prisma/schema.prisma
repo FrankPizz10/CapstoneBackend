@@ -11,9 +11,10 @@ datasource db {
 }
 
 model Player {
-  id   Int          @id @default(autoincrement())
-  name String       @unique
-  data Playerdata[]
+  id     Int            @id @default(autoincrement())
+  name   String         @unique
+  data   Playerdata[]
+  videos PlayerVideos[]
 }
 
 model Playerdata {
@@ -25,4 +26,12 @@ model Playerdata {
   Y         Float
   Z         Float
   V         Float
+}
+
+model PlayerVideos {
+  id        Int      @id @default(autoincrement())
+  player    Player   @relation(fields: [playerId], references: [id])
+  playerId  Int
+  timeStamp DateTime @unique
+  video     String
 }
