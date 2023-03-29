@@ -136,18 +136,22 @@ app.get("/api/playerData/:id", async (req, res, next) => {
   });
 });
 
-app.patch("/api/players/currentPlayer:id", async (req, res, next) => {
+app.patch("/api/currentPlayerID/:id", async (req, res, next) => {
   // if the request conntains an id parameter, update the id
   if (req.params.id) {
     updateID(Number(req.params.id));
+    res.json({
+      message: "success",
+      data: playerID,
+    });
+  } else {
+    res.json({
+      message: "Must specify an id",
+    });
   }
-  res.json({
-    message: "success",
-    data: playerID,
-  });
 });
 
-app.get("/api/players/currentPlayer", async (req, res, next) => {
+app.get("/api/currentPlayerID", async (req, res, next) => {
   res.json({
     message: "success",
     data: playerID,
