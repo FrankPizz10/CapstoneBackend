@@ -29,9 +29,19 @@ model Playerdata {
 }
 
 model PlayerVideos {
-  id        Int      @id @default(autoincrement())
-  player    Player   @relation(fields: [playerId], references: [id])
-  playerId  Int
-  timeStamp DateTime @unique
-  video     String
+  id           Int           @id @default(autoincrement())
+  player       Player        @relation(fields: [playerId], references: [id])
+  playerId     Int
+  timeStamp    DateTime      @unique
+  video        String        @unique
+  ImagesFrames ImageFrames[]
+}
+
+model ImageFrames {
+  id              Int          @id @default(autoincrement())
+  playerVideo     PlayerVideos @relation(fields: [playerVideoName], references: [video])
+  playerVideoName String
+  timeStamp       DateTime     @unique
+  X               Int
+  Y               Int
 }
