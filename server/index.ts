@@ -191,3 +191,42 @@ app.get("/api/players/:id/videos", async (req, res, next) => {
     data: videos,
   });
 });
+
+app.post("/api/imageframes", async (req, res, next) => {
+  if (!req.body.ts) {
+    res.status(400).json({ error: "No timestamp specified" });
+    return;
+  }
+  if (!req.body.pvn) {
+    res.status(400).json({ error: "No image specified" });
+    return;
+  }
+  if (!req.body.X || !req.body.Y) {
+    res.status(400).json({ error: "No coordinates specified" });
+    return;
+  }
+  const imageFrame = await prisma.imageFrames.create({
+    data: {
+      playerVideoName: req.body.pvn,
+      timeStamp: new Date(req.body.ts),
+      X: req.body.X,
+      Y: req.body.Y,
+    },
+  });
+  res.json({
+    message: "success",
+    data: imageFrame,
+  });
+});
+
+app.get("/api/imageframes/:pvn", async (req, res, next) => {
+  const imageFrames = await prisma.imageFrames.findMany({
+    where: {
+      playerVideoName: req.params.pvn,
+    },
+  });
+  res.json({
+    message: "success",
+    data: imageFrames,
+  });
+});
