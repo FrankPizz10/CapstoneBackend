@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { PrismaClient, Prisma } from "@prisma/client";
 import { seedData } from "./SeedDatabase";
+import { getAdvancedStats } from "./DatabaseHelpers";
 
 dotenv.config();
 
@@ -45,7 +46,7 @@ const updateID = (id: number) => {
 };
 
 app.get("/api/players", async (req, res, next) => {
-  const players = await prisma.player.findMany();
+  const players = await getAdvancedStats();
   res.json({
     message: "success",
     data: players,
