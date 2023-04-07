@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { PrismaClient, Prisma } from "@prisma/client";
 import { seedData } from "./SeedDatabase";
+import { time } from "console";
 
 dotenv.config();
 
@@ -31,7 +32,6 @@ app.use(cors());
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
-
 app.listen(process.env.PORT, () => {
   console.log(
     `⚡️[server]: Server is running at https://capstonebackend.herokuapp.com/:${process.env.PORT}`
@@ -42,6 +42,7 @@ let playerID = 1;
 
 const updateID = (id: number) => {
   playerID = id;
+  console.log(playerID)
 };
 
 app.get("/api/players", async (req, res, next) => {
@@ -136,6 +137,25 @@ app.get("/api/playerData/:id", async (req, res, next) => {
   });
 });
 
+app.get("/api/playerDataTimestamp/:id/:ts", async (req, res, next) => {
+  const playerData = await prisma.playerdata.findMany({
+    where: {
+      playerId: Number(req.params.id),
+    },
+  });
+  let timestamp = new Date();
+  let date = new Date(req.params.ts);
+  playerData.forEach((pd) => {
+    if (Math.abs(pd.timeStamp.getTime() - date.getTime()) < Math.abs(timestamp.getTime() - date.getTime())) {
+      timestamp = pd.timeStamp;
+    }
+  })
+  res.json({
+    message: "success",
+    data: timestamp,
+  });
+});
+
 app.patch("/api/currentPlayerID/:id", async (req, res, next) => {
   // if the request conntains an id parameter, update the id
   if (req.params.id) {
@@ -149,6 +169,7 @@ app.patch("/api/currentPlayerID/:id", async (req, res, next) => {
       message: "Must specify an id",
     });
   }
+  console.log(playerID)
 });
 
 app.get("/api/currentPlayerID", async (req, res, next) => {
